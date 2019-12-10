@@ -22,6 +22,7 @@ import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.plugin.Intercepts;
@@ -109,7 +110,7 @@ public class MultiTenancyInterceptor implements Interceptor {
 		 */
 		BoundSql newBoundSql = new BoundSql(
 				ms.getConfiguration(),
-				addWhere(mandt, boundSql.getSql()),//更改后的sql
+				addWhere(mandt, boundSql.getSql(), ms),//更改后的sql
 				boundSql.getParameterMappings(),
 				boundSql.getParameterObject());
 		/**
@@ -139,11 +140,12 @@ public class MultiTenancyInterceptor implements Interceptor {
 	/**
 	 * 添加租户id条件
 	 */
-	private String addWhere(String mandt, String sql) throws JSQLParserException {
-		Statement stmt = CCJSqlParserUtil.parse(sql);
+	private String addWhere(String mandt, String sql, MappedStatement mappedStatement) throws JSQLParserException {
+		SqlCommandType sqlCommandType = mappedStatement.getSqlCommandType();
 
 		if (StringUtils.isNotEmpty(mandt)) {
-			if (stmt instanceof Update) {
+			Statement stmt = CCJSqlParserUtil.parse(sql);
+			if (SqlCommandType.UPDATE.equals(sqlCommandType)) {
 				//获得Update对象
 				Update updateStatement = (Update) stmt;
 				//获得where条件表达式
@@ -158,7 +160,7 @@ public class MultiTenancyInterceptor implements Interceptor {
 				return updateStatement.toString();
 			}
 
-			if (stmt instanceof Select) {
+			if (SqlCommandType.SELECT.equals(sqlCommandType)) {
 				Select select = (Select) stmt;
 				PlainSelect ps = (PlainSelect) select.getSelectBody();
 				TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
