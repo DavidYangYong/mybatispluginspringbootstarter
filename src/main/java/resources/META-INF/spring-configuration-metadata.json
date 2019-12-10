@@ -1,0 +1,10 @@
+{
+	"properties": [
+		{
+			"name": "spring.sapjco.enabled",
+			"type": "java.lang.Boolean",
+			"description": "Whether to enable sap jco.",
+			"defaultValue": false
+		}
+	]
+}
