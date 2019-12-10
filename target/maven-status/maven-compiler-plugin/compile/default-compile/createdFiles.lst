@@ -1,4 +1,5 @@
 com/fl/mybatispluginspringbootstarter/utils/PluginUtils.class
+com/fl/mybatispluginspringbootstarter/interceptor/tenant/MultiTenancyInterceptor$BoundSqlSqlSource.class
 com/fl/mybatispluginspringbootstarter/annotation/CreateTime.class
 com/fl/mybatispluginspringbootstarter/interceptor/tenant/MultiTenancyInterceptor.class
 com/fl/mybatispluginspringbootstarter/autoconfigure/MybatisPluginAutoConfiguration.class
