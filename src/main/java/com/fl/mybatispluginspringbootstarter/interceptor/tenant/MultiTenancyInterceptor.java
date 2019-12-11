@@ -32,6 +32,7 @@ import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
+import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.mapping.StatementType;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.plugin.Intercepts;
@@ -61,9 +62,18 @@ public class MultiTenancyInterceptor implements Interceptor {
 		return mod(invocation);
 	}
 
-	@Override
-	public Object plugin(Object target) {
-		return Plugin.wrap(target, this);
+	public static class BoundSqlSqlSource implements SqlSource {
+
+		BoundSql boundSql;
+
+		public BoundSqlSqlSource(BoundSql boundSql) {
+			this.boundSql = boundSql;
+		}
+
+		@Override
+		public BoundSql getBoundSql(Object parameterObject) {
+			return boundSql;
+		}
 	}
 
 	@Override
@@ -80,84 +90,12 @@ public class MultiTenancyInterceptor implements Interceptor {
 		return false;
 	}
 
-	/**
-	 * 更改MappedStatement为新的
-	 */
-	public Object mod(Invocation invocation) throws Throwable {
-		String interceptMethod = invocation.getMethod().getName();
-		StatementHandler statementHandler = (StatementHandler) PluginUtils.realTarget(invocation.getTarget());
-		MetaObject metaObject = SystemMetaObject.forObject(statementHandler);
-		// 先判断是不是SELECT操作
-		MappedStatement mappedStatement = (MappedStatement) metaObject.getValue("delegate.mappedStatement");
-		if (SqlCommandType.SELECT != mappedStatement.getSqlCommandType()
-				|| StatementType.CALLABLE == mappedStatement.getStatementType()) {
-			return invocation.proceed();
+	@Override
+	public Object plugin(Object target) {
+		if (target instanceof Executor || target instanceof StatementHandler) {
+			return Plugin.wrap(target, this);
 		}
-		BoundSql boundSql = (BoundSql) metaObject.getValue("delegate.boundSql");
-
-		if ("prepare".equals(interceptMethod)) {
-			String mandt = "";
-			//获取所有参数
-			Object parameterObject = boundSql.getParameterObject();
-			if (parameterObject instanceof ITenantInfo) {
-				if (parameterObject != null) {
-					ITenantInfo tenantInfo = (ITenantInfo) parameterObject;
-					if (tenantInfo != null) {
-						mandt = tenantInfo.getMandt();
-					}
-				}
-			} else if (parameterObject instanceof MapperMethod.ParamMap) {
-				ParamMap map = (ParamMap) parameterObject;
-				for (Object o : map.keySet()) {
-					Object param = map.get(o);
-					if (param instanceof ITenantInfo) {
-						ITenantInfo tenantInfo = (ITenantInfo) param;
-						if (tenantInfo != null) {
-							mandt = tenantInfo.getMandt();
-						}
-					}
-				}
-			}
-
-			String originalSql = boundSql.getSql();
-			String builder = addWhere(mandt, originalSql, mappedStatement);
-			metaObject.setValue("delegate.boundSql.sql", builder);
-		} else if ("update".equals(interceptMethod)) {
-
-			MappedStatement ms = (MappedStatement) invocation
-					.getArgs()[0];
-
-			Object parameterObject = null;
-
-			if (invocation.getArgs().length > 1) {
-				parameterObject = invocation.getArgs()[1];
-			}
-			String mandt = "";
-			//获取所有参数
-			if (parameterObject instanceof ITenantInfo) {
-				if (parameterObject != null) {
-					ITenantInfo tenantInfo = (ITenantInfo) parameterObject;
-					if (tenantInfo != null) {
-						mandt = tenantInfo.getMandt();
-					}
-				}
-			} else if (parameterObject instanceof MapperMethod.ParamMap) {
-				ParamMap map = (ParamMap) parameterObject;
-				for (Object o : map.keySet()) {
-					Object param = map.get(o);
-					if (param instanceof ITenantInfo) {
-						ITenantInfo tenantInfo = (ITenantInfo) param;
-						if (tenantInfo != null) {
-							mandt = tenantInfo.getMandt();
-						}
-					}
-				}
-			}
-			String originalSql = boundSql.getSql();
-			String builder = addWhere(mandt, originalSql, mappedStatement);
-			metaObject.setValue("delegate.boundSql.sql", builder);
-		}
-		return invocation.proceed();
+		return target;
 	}
 
 	/**
@@ -228,5 +166,118 @@ public class MultiTenancyInterceptor implements Interceptor {
 			}
 		}
 		return map;
+	}
+
+	/**
+	 * 更改MappedStatement为新的
+	 */
+	public Object mod(Invocation invocation) throws Throwable {
+		String interceptMethod = invocation.getMethod().getName();
+
+		if ("prepare".equals(interceptMethod)) {
+			StatementHandler statementHandler = (StatementHandler) PluginUtils.realTarget(invocation.getTarget());
+			MetaObject metaObject = SystemMetaObject.forObject(statementHandler);
+			// 先判断是不是SELECT操作
+			MappedStatement mappedStatement = (MappedStatement) metaObject.getValue("delegate.mappedStatement");
+			if (SqlCommandType.SELECT != mappedStatement.getSqlCommandType()
+					|| StatementType.CALLABLE == mappedStatement.getStatementType()) {
+				return invocation.proceed();
+			}
+			BoundSql boundSql = (BoundSql) metaObject.getValue("delegate.boundSql");
+			String mandt = "";
+			//获取所有参数
+			Object parameterObject = boundSql.getParameterObject();
+			if (parameterObject instanceof ITenantInfo) {
+				if (parameterObject != null) {
+					ITenantInfo tenantInfo = (ITenantInfo) parameterObject;
+					if (tenantInfo != null) {
+						mandt = tenantInfo.getMandt();
+					}
+				}
+			} else if (parameterObject instanceof MapperMethod.ParamMap) {
+				ParamMap map = (ParamMap) parameterObject;
+				for (Object o : map.keySet()) {
+					Object param = map.get(o);
+					if (param instanceof ITenantInfo) {
+						ITenantInfo tenantInfo = (ITenantInfo) param;
+						if (tenantInfo != null) {
+							mandt = tenantInfo.getMandt();
+						}
+					}
+				}
+			}
+
+			String originalSql = boundSql.getSql();
+			String builder = addWhere(mandt, originalSql, mappedStatement);
+			metaObject.setValue("delegate.boundSql.sql", builder);
+		} else if ("update".equals(interceptMethod)) {
+
+			MappedStatement ms = (MappedStatement) invocation
+					.getArgs()[0];
+
+			SqlCommandType sct = ms.getSqlCommandType();
+			if (sct.equals(SqlCommandType.UPDATE)) {
+
+				Object parameterObject = null;
+
+				if (invocation.getArgs().length > 1) {
+					parameterObject = invocation.getArgs()[1];
+				}
+				BoundSql boundSql = ms.getBoundSql(null);
+				String mandt = "";
+				//获取所有参数
+				if (parameterObject instanceof ITenantInfo) {
+					if (parameterObject != null) {
+						ITenantInfo tenantInfo = (ITenantInfo) parameterObject;
+						if (tenantInfo != null) {
+							mandt = tenantInfo.getMandt();
+						}
+					}
+				} else if (parameterObject instanceof MapperMethod.ParamMap) {
+					ParamMap map = (ParamMap) parameterObject;
+					for (Object o : map.keySet()) {
+						Object param = map.get(o);
+						if (param instanceof ITenantInfo) {
+							ITenantInfo tenantInfo = (ITenantInfo) param;
+							if (tenantInfo != null) {
+								mandt = tenantInfo.getMandt();
+							}
+						}
+					}
+				}
+				/**
+				 * 根据已有BoundSql构造新的BoundSql
+				 *
+				 */
+				BoundSql newBoundSql = new BoundSql(
+						ms.getConfiguration(),
+						addWhere(mandt, boundSql.getSql(), ms),//更改后的sql
+						boundSql.getParameterMappings(),
+						boundSql.getParameterObject());
+				/**
+				 * 根据已有MappedStatement构造新的MappedStatement
+				 *
+				 */
+				MappedStatement.Builder builder = new MappedStatement.Builder(ms.getConfiguration(),
+						ms.getId(),
+						new BoundSqlSqlSource(newBoundSql),
+						ms.getSqlCommandType());
+
+				builder.resource(ms.getResource());
+				builder.fetchSize(ms.getFetchSize());
+				builder.statementType(ms.getStatementType());
+				builder.keyGenerator(ms.getKeyGenerator());
+				builder.timeout(ms.getTimeout());
+				builder.parameterMap(ms.getParameterMap());
+				builder.resultMaps(ms.getResultMaps());
+				builder.cache(ms.getCache());
+				MappedStatement newMs = builder.build();
+				/**
+				 * 替换MappedStatement
+				 */
+				invocation.getArgs()[0] = newMs;
+			}
+		}
+		return invocation.proceed();
 	}
 }
