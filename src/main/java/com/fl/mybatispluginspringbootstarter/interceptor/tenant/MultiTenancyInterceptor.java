@@ -96,8 +96,14 @@ public class MultiTenancyInterceptor implements Interceptor {
 			String mandt = "";
 			//获取所有参数
 			Object parameterObject = boundSql.getParameterObject();
-
-			if (parameterObject instanceof MapperMethod.ParamMap) {
+			if (parameterObject instanceof ITenantInfo) {
+				if (parameterObject != null) {
+					ITenantInfo tenantInfo = (ITenantInfo) parameterObject;
+					if (tenantInfo != null) {
+						mandt = tenantInfo.getMandt();
+					}
+				}
+			} else if (parameterObject instanceof MapperMethod.ParamMap) {
 				ParamMap map = (ParamMap) parameterObject;
 				for (Object o : map.keySet()) {
 					Object param = map.get(o);
@@ -124,12 +130,29 @@ public class MultiTenancyInterceptor implements Interceptor {
 				parameterObject = invocation.getArgs()[1];
 			}
 			String mandt = "";
+			//获取所有参数
 			if (parameterObject instanceof ITenantInfo) {
-				mandt = ((ITenantInfo) parameterObject).getMandt();
-				String originalSql = boundSql.getSql();
-				String builder = addWhere(mandt, originalSql, mappedStatement);
-				metaObject.setValue("delegate.boundSql.sql", builder);
+				if (parameterObject != null) {
+					ITenantInfo tenantInfo = (ITenantInfo) parameterObject;
+					if (tenantInfo != null) {
+						mandt = tenantInfo.getMandt();
+					}
+				}
+			} else if (parameterObject instanceof MapperMethod.ParamMap) {
+				ParamMap map = (ParamMap) parameterObject;
+				for (Object o : map.keySet()) {
+					Object param = map.get(o);
+					if (param instanceof ITenantInfo) {
+						ITenantInfo tenantInfo = (ITenantInfo) param;
+						if (tenantInfo != null) {
+							mandt = tenantInfo.getMandt();
+						}
+					}
+				}
 			}
+			String originalSql = boundSql.getSql();
+			String builder = addWhere(mandt, originalSql, mappedStatement);
+			metaObject.setValue("delegate.boundSql.sql", builder);
 		}
 		return invocation.proceed();
 	}
