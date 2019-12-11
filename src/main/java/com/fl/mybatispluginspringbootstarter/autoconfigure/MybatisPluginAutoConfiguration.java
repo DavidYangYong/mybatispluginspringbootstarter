@@ -13,17 +13,14 @@ import com.github.pagehelper.autoconfigure.PageHelperAutoConfiguration;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConditionalOnBean(SqlSessionFactory.class)
-@AutoConfigureAfter(MybatisAutoConfiguration.class)
-@AutoConfigureBefore(PageHelperAutoConfiguration.class)
+@AutoConfigureAfter(PageHelperAutoConfiguration.class)
 public class MybatisPluginAutoConfiguration {
 
 	@Autowired
