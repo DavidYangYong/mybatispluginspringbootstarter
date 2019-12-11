@@ -3,7 +3,6 @@ package com.fl.mybatispluginspringbootstarter.interceptor.tenant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.regex.Pattern;
 import net.sf.jsqlparser.JSQLParserException;
@@ -30,6 +29,7 @@ import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.mapping.SqlSource;
 import org.apache.ibatis.plugin.Interceptor;
@@ -85,7 +85,7 @@ public class MultiTenancyInterceptor implements Interceptor {
 	boolean resolve(MetaObject mo) {
 		String originalSql = (String) mo.getValue("boundSql.sql");
 		MappedStatement ms = (MappedStatement) mo.getValue("mappedStatement");
-		if (Objects.equals(ms.getSqlCommandType(), SqlCommandType.UPDATE)) {
+		if (ms.getSqlCommandType() == SqlCommandType.SELECT || ms.getSqlCommandType() == SqlCommandType.UPDATE) {
 			// sql中包含mandt = ?
 			return Pattern.matches("[\\s\\S]*?" + MANDT + "[\\s\\S]*?=[\\s\\S]*?\\?[\\s\\S]*?", originalSql.toLowerCase());
 		}
@@ -183,7 +183,7 @@ public class MultiTenancyInterceptor implements Interceptor {
 		if (invocation.getArgs().length > 1) {
 			parameterObject = invocation.getArgs()[1];
 		}
-		BoundSql boundSql = ms.getBoundSql(null);
+
 		String mandt = "";
 		//获取所有参数
 		if (parameterObject instanceof ITenantInfo) {
@@ -205,38 +205,54 @@ public class MultiTenancyInterceptor implements Interceptor {
 				}
 			}
 		}
-				/**
-				 * 根据已有BoundSql构造新的BoundSql
-				 *
-				 */
-				BoundSql newBoundSql = new BoundSql(
-						ms.getConfiguration(),
-						addWhere(mandt, boundSql.getSql(), ms),//更改后的sql
-						boundSql.getParameterMappings(),
-						boundSql.getParameterObject());
-				/**
-				 * 根据已有MappedStatement构造新的MappedStatement
-				 *
-				 */
-				MappedStatement.Builder builder = new MappedStatement.Builder(ms.getConfiguration(),
-						ms.getId(),
-						new BoundSqlSqlSource(newBoundSql),
-						ms.getSqlCommandType());
 
-				builder.resource(ms.getResource());
-				builder.fetchSize(ms.getFetchSize());
-				builder.statementType(ms.getStatementType());
-				builder.keyGenerator(ms.getKeyGenerator());
-				builder.timeout(ms.getTimeout());
-				builder.parameterMap(ms.getParameterMap());
-				builder.resultMaps(ms.getResultMaps());
-				builder.cache(ms.getCache());
-				MappedStatement newMs = builder.build();
-				/**
-				 * 替换MappedStatement
-				 */
-				invocation.getArgs()[0] = newMs;
+		BoundSql boundSql = ms.getBoundSql(parameterObject);
+		/**
+		 * 根据已有BoundSql构造新的BoundSql
+		 *
+		 */
+		BoundSql newBoundSql = new BoundSql(
+				ms.getConfiguration(),
+				addWhere(mandt, boundSql.getSql(), ms),//更改后的sql
+				boundSql.getParameterMappings(),
+				boundSql.getParameterObject());
+		/**
+		 * 根据已有MappedStatement构造新的MappedStatement
+		 *
+		 */
+		// 把新的查询放到statement里
+		MappedStatement newMs = copyFromMappedStatement(ms, new BoundSqlSqlSource(newBoundSql));
+		for (ParameterMapping mapping : boundSql.getParameterMappings()) {
+			String prop = mapping.getProperty();
+			if (boundSql.hasAdditionalParameter(prop)) {
+				newBoundSql.setAdditionalParameter(prop, boundSql.getAdditionalParameter(prop));
+			}
+		}
+		/**
+		 * 替换MappedStatement
+		 */
+		invocation.getArgs()[0] = newMs;
 
 		return invocation.proceed();
+	}
+
+	private MappedStatement copyFromMappedStatement(MappedStatement ms, SqlSource newSqlSource) {
+		MappedStatement.Builder builder = new MappedStatement.Builder(ms.getConfiguration(), ms.getId(), newSqlSource,
+				ms.getSqlCommandType());
+		builder.resource(ms.getResource());
+		builder.fetchSize(ms.getFetchSize());
+		builder.statementType(ms.getStatementType());
+		builder.keyGenerator(ms.getKeyGenerator());
+		if (ms.getKeyProperties() != null && ms.getKeyProperties().length > 0) {
+			builder.keyProperty(ms.getKeyProperties()[0]);
+		}
+		builder.timeout(ms.getTimeout());
+		builder.parameterMap(ms.getParameterMap());
+		builder.resultMaps(ms.getResultMaps());
+		builder.resultSetType(ms.getResultSetType());
+		builder.cache(ms.getCache());
+		builder.flushCacheRequired(ms.isFlushCacheRequired());
+		builder.useCache(ms.isUseCache());
+		return builder.build();
 	}
 }
