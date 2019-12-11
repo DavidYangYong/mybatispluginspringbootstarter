@@ -2,7 +2,9 @@ package com.fl.mybatispluginspringbootstarter.interceptor.tenant;
 
 import com.fl.mybatispluginspringbootstarter.utils.PluginUtils;
 import java.sql.Connection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.regex.Pattern;
@@ -15,7 +17,9 @@ import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.update.Update;
@@ -157,10 +161,10 @@ public class MultiTenancyInterceptor implements Interceptor {
 				PlainSelect ps = (PlainSelect) select.getSelectBody();
 				TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
 				List<String> tableList = tablesNamesFinder.getTableList(select);
-
+				Map<String, String> map = parseTableAlias(ps);
 				for (String table : tableList) {
 					EqualsTo equalsTo = new EqualsTo();
-					equalsTo.setLeftExpression(new Column(table + '.' + MANDT));
+					equalsTo.setLeftExpression(new Column(map.get(table) + '.' + MANDT));
 					equalsTo.setRightExpression(new StringValue(mandt));
 					if (ps.getWhere() == null) {
 
@@ -176,5 +180,25 @@ public class MultiTenancyInterceptor implements Interceptor {
 			}
 		}
 		return sql;
+	}
+
+	public Map<String, String> parseTableAlias(PlainSelect plainSelect) {
+		Map<String, String> map = new HashMap<>();
+		Table table = (Table) plainSelect.getFromItem();
+		if (table.getAlias() != null) {
+			map.put(table.getName(), table.getAlias().getName());
+		} else {
+			map.put(table.getName(), table.getName());
+		}
+
+		for (Join join : plainSelect.getJoins()) {
+			Table table1 = (Table) join.getRightItem();
+			if (table1.getAlias() != null) {
+				map.put(table1.getName(), table1.getAlias().getName());
+			} else {
+				map.put(table1.getName(), table1.getName());
+			}
+		}
+		return map;
 	}
 }
