@@ -55,15 +55,18 @@ public class MultiTenancyInterceptor implements Interceptor {
 	public MultiTenancyInterceptor() {
 	}
 
+	@Override
 	public Object intercept(Invocation invocation) throws Throwable {
 
 		return mod(invocation);
 	}
 
+	@Override
 	public Object plugin(Object target) {
 		return Plugin.wrap(target, this);
 	}
 
+	@Override
 	public void setProperties(Properties properties) {
 	}
 
@@ -214,12 +217,14 @@ public class MultiTenancyInterceptor implements Interceptor {
 			map.put(table.getFullyQualifiedName(), table.getName());
 		}
 
-		for (Join join : plainSelect.getJoins()) {
-			Table table1 = (Table) join.getRightItem();
-			if (table1.getAlias() != null) {
-				map.put(table1.getFullyQualifiedName(), table1.getAlias().getName());
-			} else {
-				map.put(table1.getFullyQualifiedName(), table1.getName());
+		if (plainSelect.getJoins() != null && plainSelect.getJoins().size() > 0) {
+			for (Join join : plainSelect.getJoins()) {
+				Table table1 = (Table) join.getRightItem();
+				if (table1.getAlias() != null) {
+					map.put(table1.getFullyQualifiedName(), table1.getAlias().getName());
+				} else {
+					map.put(table1.getFullyQualifiedName(), table1.getName());
+				}
 			}
 		}
 		return map;
