@@ -209,17 +209,17 @@ public class MultiTenancyInterceptor implements Interceptor {
 		Map<String, String> map = new HashMap<>();
 		Table table = (Table) plainSelect.getFromItem();
 		if (table.getAlias() != null) {
-			map.put(table.getName(), table.getAlias().getName());
+			map.put(table.getFullyQualifiedName(), table.getAlias().getName());
 		} else {
-			map.put(table.getName(), table.getName());
+			map.put(table.getFullyQualifiedName(), table.getName());
 		}
 
 		for (Join join : plainSelect.getJoins()) {
 			Table table1 = (Table) join.getRightItem();
 			if (table1.getAlias() != null) {
-				map.put(table1.getName(), table1.getAlias().getName());
+				map.put(table1.getFullyQualifiedName(), table1.getAlias().getName());
 			} else {
-				map.put(table1.getName(), table1.getName());
+				map.put(table1.getFullyQualifiedName(), table1.getName());
 			}
 		}
 		return map;
