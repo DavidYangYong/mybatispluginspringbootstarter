@@ -37,7 +37,6 @@ import org.apache.ibatis.plugin.Intercepts;
 import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.plugin.Plugin;
 import org.apache.ibatis.plugin.Signature;
-import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
@@ -82,14 +81,9 @@ public class MultiTenancyInterceptor implements Interceptor {
 	public void setProperties(Properties properties) {
 	}
 
-	boolean resolve(MetaObject mo) {
-		String originalSql = (String) mo.getValue("boundSql.sql");
-		MappedStatement ms = (MappedStatement) mo.getValue("mappedStatement");
-		if (ms.getSqlCommandType() == SqlCommandType.SELECT || ms.getSqlCommandType() == SqlCommandType.UPDATE) {
-			// sql中包含mandt = ?
-			return Pattern.matches("[\\s\\S]*?" + MANDT + "[\\s\\S]*?=[\\s\\S]*?\\?[\\s\\S]*?", originalSql.toLowerCase());
-		}
-		return false;
+	boolean resolve(String originalSql) {
+		// sql中包含mandt = ?
+		return Pattern.matches("[\\s\\S]*?" + MANDT + "[\\s\\S]*?=[\\s\\S]*?\\?[\\s\\S]*?", originalSql.toLowerCase());
 	}
 
 	@Override
@@ -207,13 +201,19 @@ public class MultiTenancyInterceptor implements Interceptor {
 		}
 
 		BoundSql boundSql = ms.getBoundSql(parameterObject);
+
+		String oldSql = boundSql.getSql();
+
+		if (resolve(oldSql)) {
+			return invocation.proceed();
+		}
 		/**
 		 * 根据已有BoundSql构造新的BoundSql
 		 *
 		 */
 		BoundSql newBoundSql = new BoundSql(
 				ms.getConfiguration(),
-				addWhere(mandt, boundSql.getSql(), ms),//更改后的sql
+				addWhere(mandt, oldSql, ms),//更改后的sql
 				boundSql.getParameterMappings(),
 				boundSql.getParameterObject());
 		/**
@@ -221,7 +221,7 @@ public class MultiTenancyInterceptor implements Interceptor {
 		 *
 		 */
 		// 把新的查询放到statement里
-		MappedStatement newMs = copyFromMappedStatement(ms, new BoundSqlSqlSource(newBoundSql));
+		MappedStatement newms = copyFromMappedStatement(ms, new BoundSqlSqlSource(newBoundSql));
 		for (ParameterMapping mapping : boundSql.getParameterMappings()) {
 			String prop = mapping.getProperty();
 			if (boundSql.hasAdditionalParameter(prop)) {
@@ -231,7 +231,7 @@ public class MultiTenancyInterceptor implements Interceptor {
 		/**
 		 * 替换MappedStatement
 		 */
-		invocation.getArgs()[0] = newMs;
+		invocation.getArgs()[0] = newms;
 
 		return invocation.proceed();
 	}
