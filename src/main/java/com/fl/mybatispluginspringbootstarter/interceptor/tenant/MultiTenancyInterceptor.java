@@ -264,7 +264,14 @@ public class MultiTenancyInterceptor implements Interceptor {
 				PlainSelect ps = (PlainSelect) select.getSelectBody();
 				TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
 				List<String> tableList = tablesNamesFinder.getTableList(select);
-				if (CollectionUtils.containsAny(tableList, DUAL)) {
+				boolean b = false;
+				for (String s : tableList) {
+					if (StringUtils.equalsIgnoreCase(s, DUAL)) {
+						b = true;
+						break;
+					}
+				}
+				if (b) {
 					return invocation.proceed();
 				}
 			}
