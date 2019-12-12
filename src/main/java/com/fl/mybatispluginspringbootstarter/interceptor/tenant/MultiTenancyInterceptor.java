@@ -56,6 +56,8 @@ import org.apache.ibatis.session.RowBounds;
 public class MultiTenancyInterceptor implements Interceptor {
 
 	private final static String MANDT = "MANDT";
+	private final static String DUAL = "DUAL";
+
 
 	public MultiTenancyInterceptor() {
 	}
@@ -256,6 +258,17 @@ public class MultiTenancyInterceptor implements Interceptor {
 			if (resolve(oldSql, ms.getSqlCommandType())) {
 				return invocation.proceed();
 			}
+			if (SqlCommandType.SELECT == ms.getSqlCommandType()) {
+				Statement statement = CCJSqlParserUtil.parse(oldSql);
+				Select select = (Select) statement;
+				PlainSelect ps = (PlainSelect) select.getSelectBody();
+				TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
+				List<String> tableList = tablesNamesFinder.getTableList(select);
+				if (CollectionUtils.containsAny(tableList, DUAL)) {
+					return invocation.proceed();
+				}
+			}
+
 			/**
 			 * 根据已有BoundSql构造新的BoundSql
 			 *
