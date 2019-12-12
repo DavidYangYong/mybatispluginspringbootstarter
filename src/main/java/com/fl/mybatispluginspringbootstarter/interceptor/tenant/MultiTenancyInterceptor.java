@@ -218,68 +218,74 @@ public class MultiTenancyInterceptor implements Interceptor {
 		MappedStatement ms = (MappedStatement) invocation
 				.getArgs()[0];
 
-		Object parameterObject = null;
+		if (SqlCommandType.SELECT == ms.getSqlCommandType() || SqlCommandType.UPDATE == ms.getSqlCommandType()
+				|| SqlCommandType.DELETE == ms.getSqlCommandType()) {
 
-		if (invocation.getArgs().length > 1) {
-			parameterObject = invocation.getArgs()[1];
-		}
+			Object parameterObject = null;
 
-		String mandt = "";
-		//获取所有参数
-		if (parameterObject instanceof ITenantInfo) {
-			if (parameterObject != null) {
-				ITenantInfo tenantInfo = (ITenantInfo) parameterObject;
-				if (tenantInfo != null) {
-					mandt = tenantInfo.getMandt();
-				}
+			if (invocation.getArgs().length > 1) {
+				parameterObject = invocation.getArgs()[1];
 			}
-		} else if (parameterObject instanceof MapperMethod.ParamMap) {
-			ParamMap map = (ParamMap) parameterObject;
-			for (Object o : map.keySet()) {
-				Object param = map.get(o);
-				if (param instanceof ITenantInfo) {
-					ITenantInfo tenantInfo = (ITenantInfo) param;
+
+			String mandt = "";
+			//获取所有参数
+			if (parameterObject instanceof ITenantInfo) {
+				if (parameterObject != null) {
+					ITenantInfo tenantInfo = (ITenantInfo) parameterObject;
 					if (tenantInfo != null) {
 						mandt = tenantInfo.getMandt();
 					}
 				}
+			} else if (parameterObject instanceof MapperMethod.ParamMap) {
+				ParamMap map = (ParamMap) parameterObject;
+				for (Object o : map.keySet()) {
+					Object param = map.get(o);
+					if (param instanceof ITenantInfo) {
+						ITenantInfo tenantInfo = (ITenantInfo) param;
+						if (tenantInfo != null) {
+							mandt = tenantInfo.getMandt();
+						}
+					}
+				}
 			}
-		}
 
-		BoundSql boundSql = ms.getBoundSql(parameterObject);
+			BoundSql boundSql = ms.getBoundSql(parameterObject);
 
-		String oldSql = boundSql.getSql();
+			String oldSql = boundSql.getSql();
 
-		if (resolve(oldSql, ms.getSqlCommandType())) {
+			if (resolve(oldSql, ms.getSqlCommandType())) {
+				return invocation.proceed();
+			}
+			/**
+			 * 根据已有BoundSql构造新的BoundSql
+			 *
+			 */
+			BoundSql newBoundSql = new BoundSql(
+					ms.getConfiguration(),
+					addWhere(mandt, oldSql, ms),//更改后的sql
+					boundSql.getParameterMappings(),
+					boundSql.getParameterObject());
+			/**
+			 * 根据已有MappedStatement构造新的MappedStatement
+			 *
+			 */
+			// 把新的查询放到statement里
+			MappedStatement newms = copyFromMappedStatement(ms, new BoundSqlSqlSource(newBoundSql));
+			for (ParameterMapping mapping : boundSql.getParameterMappings()) {
+				String prop = mapping.getProperty();
+				if (boundSql.hasAdditionalParameter(prop)) {
+					newBoundSql.setAdditionalParameter(prop, boundSql.getAdditionalParameter(prop));
+				}
+			}
+			/**
+			 * 替换MappedStatement
+			 */
+			invocation.getArgs()[0] = newms;
+			return invocation.proceed();
+		} else {
 			return invocation.proceed();
 		}
-		/**
-		 * 根据已有BoundSql构造新的BoundSql
-		 *
-		 */
-		BoundSql newBoundSql = new BoundSql(
-				ms.getConfiguration(),
-				addWhere(mandt, oldSql, ms),//更改后的sql
-				boundSql.getParameterMappings(),
-				boundSql.getParameterObject());
-		/**
-		 * 根据已有MappedStatement构造新的MappedStatement
-		 *
-		 */
-		// 把新的查询放到statement里
-		MappedStatement newms = copyFromMappedStatement(ms, new BoundSqlSqlSource(newBoundSql));
-		for (ParameterMapping mapping : boundSql.getParameterMappings()) {
-			String prop = mapping.getProperty();
-			if (boundSql.hasAdditionalParameter(prop)) {
-				newBoundSql.setAdditionalParameter(prop, boundSql.getAdditionalParameter(prop));
-			}
-		}
-		/**
-		 * 替换MappedStatement
-		 */
-		invocation.getArgs()[0] = newms;
 
-		return invocation.proceed();
 	}
 
 	private MappedStatement copyFromMappedStatement(MappedStatement ms, SqlSource newSqlSource) {
