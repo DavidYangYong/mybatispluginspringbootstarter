@@ -101,17 +101,20 @@ public class MultiTenancyInterceptor implements Interceptor {
 			Delete delete = (Delete) statement;
 			where = delete.getWhere();
 		}
+		boolean b = false;
+		if (where != null) {
 
-		where.accept(new ExpressionVisitorAdapter() {
+			where.accept(new ExpressionVisitorAdapter() {
 
-			@Override
-			public void visit(Column column) {
-				super.visit(column);
-				columnList.add(column.getColumnName().toUpperCase());
-			}
-		});
+				@Override
+				public void visit(Column column) {
+					super.visit(column);
+					columnList.add(column.getColumnName().toUpperCase());
+				}
+			});
 
-		boolean b = CollectionUtils.containsAny(columnList, MANDT);
+			b = CollectionUtils.containsAny(columnList, MANDT);
+		}
 		return b;
 	}
 
