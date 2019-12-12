@@ -35,6 +35,7 @@
 		<dependency>
 			<artifactId>spring-boot-starter</artifactId>
 			<groupId>org.springframework.boot</groupId>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
@@ -45,16 +46,19 @@
 		<dependency>
 			<artifactId>spring-boot-autoconfigure</artifactId>
 			<groupId>org.springframework.boot</groupId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<artifactId>lombok</artifactId>
 			<groupId>org.projectlombok</groupId>
 			<optional>true</optional>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<artifactId>mybatis-spring-boot-starter</artifactId>
 			<groupId>org.mybatis.spring.boot</groupId>
 			<version>2.0.1</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -65,6 +69,7 @@
 			<artifactId>jsqlparser</artifactId>
 			<groupId>com.github.jsqlparser</groupId>
 			<version>1.4</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<artifactId>commons-lang</artifactId>
