@@ -1,13 +1,14 @@
 package com.fl.mybatispluginspringbootstarter.interceptor.tenant;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Pattern;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.ExpressionVisitorAdapter;
 import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -16,11 +17,13 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.update.Update;
 import net.sf.jsqlparser.util.TablesNamesFinder;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.binding.MapperMethod.ParamMap;
@@ -81,9 +84,35 @@ public class MultiTenancyInterceptor implements Interceptor {
 	public void setProperties(Properties properties) {
 	}
 
-	boolean resolve(String originalSql) {
-		// sql中包含mandt = ?
-		return Pattern.matches("[\\s\\S]*?" + MANDT + "[\\s\\S]*?=[\\s\\S]*?\\?[\\s\\S]*?", originalSql.toLowerCase());
+	boolean resolve(String originalSql, SqlCommandType sqlCommandType) throws JSQLParserException {
+		final List<String> columnList = new ArrayList<String>();
+		Statement statement = CCJSqlParserUtil.parse(originalSql);
+		Expression where = null;
+		if (SqlCommandType.UPDATE == sqlCommandType) {
+			Update update = (Update) statement;
+			where = update.getWhere();
+		}
+		if (SqlCommandType.SELECT == sqlCommandType) {
+			Select select = (Select) statement;
+			PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
+			where = plainSelect.getWhere();
+		}
+		if (SqlCommandType.DELETE == sqlCommandType) {
+			Delete delete = (Delete) statement;
+			where = delete.getWhere();
+		}
+
+		where.accept(new ExpressionVisitorAdapter() {
+
+			@Override
+			public void visit(Column column) {
+				super.visit(column);
+				columnList.add(column.getColumnName().toUpperCase());
+			}
+		});
+
+		boolean b = CollectionUtils.containsAny(columnList, MANDT);
+		return b;
 	}
 
 	@Override
@@ -116,6 +145,20 @@ public class MultiTenancyInterceptor implements Interceptor {
 				return updateStatement.toString();
 			}
 
+			if (SqlCommandType.DELETE == mappedStatement.getSqlCommandType()) {
+				//获得Update对象
+				Delete deleteStatement = (Delete) statement;
+				//获得where条件表达式
+				Expression where = deleteStatement.getWhere();
+				if (where instanceof BinaryExpression) {
+					EqualsTo equalsTo = new EqualsTo();
+					equalsTo.setLeftExpression(new Column(MANDT));
+					equalsTo.setRightExpression(new StringValue(mandt));
+					AndExpression andExpression = new AndExpression(equalsTo, where);
+					deleteStatement.setWhere(andExpression);
+				}
+				return deleteStatement.toString();
+			}
 			if (SqlCommandType.SELECT == mappedStatement.getSqlCommandType()) {
 				Select select = (Select) statement;
 				PlainSelect ps = (PlainSelect) select.getSelectBody();
@@ -204,7 +247,7 @@ public class MultiTenancyInterceptor implements Interceptor {
 
 		String oldSql = boundSql.getSql();
 
-		if (resolve(oldSql)) {
+		if (resolve(oldSql, ms.getSqlCommandType())) {
 			return invocation.proceed();
 		}
 		/**

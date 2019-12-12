@@ -70,6 +70,13 @@
 			<artifactId>commons-lang</artifactId>
 			<groupId>commons-lang</groupId>
 			<version>2.4</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<artifactId>commons-collections4</artifactId>
+			<groupId>org.apache.commons</groupId>
+			<scope>provided</scope>
+			<version>4.2</version>
 		</dependency>
 		<dependency>
 			<artifactId>pagehelper-spring-boot-starter</artifactId>
