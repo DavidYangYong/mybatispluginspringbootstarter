@@ -68,8 +68,7 @@
 		<dependency>
 			<artifactId>jsqlparser</artifactId>
 			<groupId>com.github.jsqlparser</groupId>
-			<version>1.4</version>
-			<scope>provided</scope>
+			<version>3.1</version>
 		</dependency>
 		<dependency>
 			<artifactId>commons-lang</artifactId>
