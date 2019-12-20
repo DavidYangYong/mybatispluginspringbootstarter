@@ -21,6 +21,7 @@ import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.update.Update;
 import net.sf.jsqlparser.util.TablesNamesFinder;
 import org.apache.commons.collections4.CollectionUtils;
@@ -166,25 +167,29 @@ public class MultiTenancyInterceptor implements Interceptor {
 			}
 			if (SqlCommandType.SELECT == mappedStatement.getSqlCommandType()) {
 				Select select = (Select) statement;
-				PlainSelect ps = (PlainSelect) select.getSelectBody();
-				TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
-				List<String> tableList = tablesNamesFinder.getTableList(select);
-				Map<String, String> map = parseTableAlias(ps);
-				for (String table : tableList) {
-					EqualsTo equalsTo = new EqualsTo();
-					equalsTo.setLeftExpression(new Column(map.get(table) + '.' + MANDT));
-					equalsTo.setRightExpression(new StringValue(mandt));
-					if (ps.getWhere() == null) {
+				SelectBody selectBody = select.getSelectBody();
+				if (selectBody instanceof PlainSelect) {
+					PlainSelect ps = (PlainSelect) selectBody;
+					TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
+					List<String> tableList = tablesNamesFinder.getTableList(select);
+					Map<String, String> map = parseTableAlias(ps);
+					for (String table : tableList) {
+						EqualsTo equalsTo = new EqualsTo();
+						equalsTo.setLeftExpression(new Column(map.get(table) + '.' + MANDT));
+						equalsTo.setRightExpression(new StringValue(mandt));
+						if (ps.getWhere() == null) {
 
-						ps.setWhere(new Parenthesis(equalsTo));
+							ps.setWhere(new Parenthesis(equalsTo));
 
-					} else {
+						} else {
 
-						ps.setWhere(new AndExpression(ps.getWhere(), new Parenthesis(equalsTo)));
+							ps.setWhere(new AndExpression(ps.getWhere(), new Parenthesis(equalsTo)));
 
+						}
 					}
+					return select.toString();
 				}
-				return select.toString();
+
 			}
 		}
 		return sql;
