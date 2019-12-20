@@ -91,19 +91,31 @@ public class MultiTenancyInterceptor implements Interceptor {
 		final List<String> columnList = new ArrayList<String>();
 		Statement statement = CCJSqlParserUtil.parse(originalSql);
 		Expression where = null;
+		boolean b = false;
 		if (SqlCommandType.UPDATE == sqlCommandType) {
 			Update update = (Update) statement;
 			where = update.getWhere();
+			b = isResolve(columnList, where);
 		}
 		if (SqlCommandType.SELECT == sqlCommandType) {
 			Select select = (Select) statement;
-			PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
-			where = plainSelect.getWhere();
+			SelectBody selectBody = select.getSelectBody();
+			if (selectBody instanceof PlainSelect) {
+				PlainSelect plainSelect = (PlainSelect) selectBody;
+				where = plainSelect.getWhere();
+				b = isResolve(columnList, where);
+			}
 		}
 		if (SqlCommandType.DELETE == sqlCommandType) {
 			Delete delete = (Delete) statement;
 			where = delete.getWhere();
+			b = isResolve(columnList, where);
 		}
+
+		return b;
+	}
+
+	private boolean isResolve(List<String> columnList, Expression where) {
 		boolean b = false;
 		if (where != null) {
 
