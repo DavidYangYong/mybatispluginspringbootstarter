@@ -91,7 +91,7 @@ public class MultiTenancyInterceptor implements Interceptor {
 		final List<String> columnList = new ArrayList<String>();
 		Statement statement = CCJSqlParserUtil.parse(originalSql);
 		Expression where = null;
-		boolean b = false;
+		boolean b = true;
 		if (SqlCommandType.UPDATE == sqlCommandType) {
 			Update update = (Update) statement;
 			where = update.getWhere();
