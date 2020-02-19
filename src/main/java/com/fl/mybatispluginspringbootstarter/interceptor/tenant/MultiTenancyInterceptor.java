@@ -237,8 +237,13 @@ public class MultiTenancyInterceptor implements Interceptor {
 		MappedStatement ms = (MappedStatement) invocation
 				.getArgs()[0];
 
-		if (SqlCommandType.SELECT == ms.getSqlCommandType() || SqlCommandType.UPDATE == ms.getSqlCommandType()
-				|| SqlCommandType.DELETE == ms.getSqlCommandType()) {
+		SqlCommandType sqlCommandType = ms.getSqlCommandType();
+		if (SqlCommandType.INSERT == sqlCommandType) {
+			return invocation.proceed();
+		}
+
+		if (SqlCommandType.SELECT == sqlCommandType || SqlCommandType.UPDATE == sqlCommandType
+				|| SqlCommandType.DELETE == sqlCommandType) {
 
 			Object parameterObject = null;
 
@@ -272,10 +277,10 @@ public class MultiTenancyInterceptor implements Interceptor {
 
 			String oldSql = boundSql.getSql();
 
-			if (resolve(oldSql, ms.getSqlCommandType())) {
+			if (resolve(oldSql, sqlCommandType)) {
 				return invocation.proceed();
 			}
-			if (SqlCommandType.SELECT == ms.getSqlCommandType()) {
+			if (SqlCommandType.SELECT == sqlCommandType) {
 				Statement statement = CCJSqlParserUtil.parse(oldSql);
 				Select select = (Select) statement;
 				PlainSelect ps = (PlainSelect) select.getSelectBody();
