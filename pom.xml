@@ -68,7 +68,7 @@
 		<dependency>
 			<artifactId>jsqlparser</artifactId>
 			<groupId>com.github.jsqlparser</groupId>
-			<version>2.0</version>
+			<version>3.1</version>
 		</dependency>
 		<dependency>
 			<artifactId>commons-lang</artifactId>
@@ -116,7 +116,7 @@
 		<java.version>1.8</java.version>
 		<pagehelper-spring-boot-starter>1.2.13</pagehelper-spring-boot-starter>
 	</properties>
-	<version>1.2.1-RELEASE</version>
+	<version>1.2.2-RELEASE</version>
 
 
 </project>

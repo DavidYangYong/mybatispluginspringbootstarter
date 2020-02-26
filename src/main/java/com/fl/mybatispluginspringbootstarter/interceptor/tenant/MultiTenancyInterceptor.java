@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
@@ -54,6 +55,7 @@ import org.apache.ibatis.session.RowBounds;
 				ResultHandler.class}),
 		@Signature(type = Executor.class, method = "update", args = {MappedStatement.class, Object.class})
 })
+@Slf4j
 public class MultiTenancyInterceptor implements Interceptor {
 
 	private final static String MANDT = "MANDT";
@@ -186,17 +188,19 @@ public class MultiTenancyInterceptor implements Interceptor {
 					List<String> tableList = tablesNamesFinder.getTableList(select);
 					Map<String, String> map = parseTableAlias(ps);
 					for (String table : tableList) {
-						EqualsTo equalsTo = new EqualsTo();
-						equalsTo.setLeftExpression(new Column(map.get(table) + '.' + MANDT));
-						equalsTo.setRightExpression(new StringValue(mandt));
-						if (ps.getWhere() == null) {
+						if (StringUtils.isNotEmpty(map.get(table))) {
+							EqualsTo equalsTo = new EqualsTo();
+							equalsTo.setLeftExpression(new Column(map.get(table) + '.' + MANDT));
+							equalsTo.setRightExpression(new StringValue(mandt));
+							if (ps.getWhere() == null) {
 
-							ps.setWhere(new Parenthesis(equalsTo));
+								ps.setWhere(new Parenthesis(equalsTo));
 
-						} else {
+							} else {
 
-							ps.setWhere(new AndExpression(ps.getWhere(), new Parenthesis(equalsTo)));
+								ps.setWhere(new AndExpression(ps.getWhere(), new Parenthesis(equalsTo)));
 
+							}
 						}
 					}
 					return select.toString();
@@ -238,6 +242,8 @@ public class MultiTenancyInterceptor implements Interceptor {
 				.getArgs()[0];
 
 		SqlCommandType sqlCommandType = ms.getSqlCommandType();
+
+		log.info("sqlCommandType is: {} ", sqlCommandType.name());
 		if (SqlCommandType.INSERT == sqlCommandType) {
 			return invocation.proceed();
 		}
@@ -277,6 +283,7 @@ public class MultiTenancyInterceptor implements Interceptor {
 
 			String oldSql = boundSql.getSql();
 
+			log.info("oldsql is {} ", oldSql);
 			if (resolve(oldSql, sqlCommandType)) {
 				return invocation.proceed();
 			}
