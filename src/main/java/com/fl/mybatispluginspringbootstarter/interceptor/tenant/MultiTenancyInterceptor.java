@@ -243,7 +243,7 @@ public class MultiTenancyInterceptor implements Interceptor {
 
 		SqlCommandType sqlCommandType = ms.getSqlCommandType();
 
-		log.info("sqlCommandType is: {} ", sqlCommandType.name());
+		log.debug("sqlCommandType is: {} ", sqlCommandType.name());
 		if (SqlCommandType.INSERT == sqlCommandType) {
 			return invocation.proceed();
 		}
@@ -283,7 +283,7 @@ public class MultiTenancyInterceptor implements Interceptor {
 
 			String oldSql = boundSql.getSql();
 
-			log.info("oldsql is {} ", oldSql);
+			log.debug("oldsql is {} ", oldSql);
 			if (resolve(oldSql, sqlCommandType)) {
 				return invocation.proceed();
 			}
