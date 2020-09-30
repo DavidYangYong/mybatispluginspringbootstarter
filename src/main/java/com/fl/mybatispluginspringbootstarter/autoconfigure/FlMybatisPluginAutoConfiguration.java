@@ -17,26 +17,26 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConditionalOnBean(SqlSessionFactory.class)
 @AutoConfigureAfter(PageHelperAutoConfiguration.class)
 @EnableConfigurationProperties({FlMybatisProperties.class})
-public class MybatisPluginAutoConfiguration {
+public class FlMybatisPluginAutoConfiguration {
 
 	@Autowired
 	private List<SqlSessionFactory> sqlSessionFactoryList;
-	@Autowired(required = false)
-	private MultiTenancyInterceptor multiTenancyInterceptor;
 
-	@Bean
-	@ConditionalOnProperty(prefix = "com.fl.mybatis.multi-tenancy", name = "enabled", havingValue = "true")
-	public MultiTenancyInterceptor createMultiTenancyInterceptor() {
-		return new MultiTenancyInterceptor();
+	@Autowired(required = false)
+	private FlMybatisProperties flMybatisProperties;
+
+	public FlMybatisPluginAutoConfiguration() {
+	}
+
+	public FlMybatisProperties getFlMybatisProperties() {
+		return flMybatisProperties;
 	}
 
 	@PostConstruct
@@ -44,7 +44,9 @@ public class MybatisPluginAutoConfiguration {
 		OpertationTimeInterceptor interceptor = new OpertationTimeInterceptor();
 		for (SqlSessionFactory sqlSessionFactory : sqlSessionFactoryList) {
 			sqlSessionFactory.getConfiguration().addInterceptor(interceptor);
-			if (multiTenancyInterceptor != null) {
+
+			if (flMybatisProperties != null && flMybatisProperties.isEnabled()) {
+				MultiTenancyInterceptor multiTenancyInterceptor = new MultiTenancyInterceptor();
 				sqlSessionFactory.getConfiguration().addInterceptor(multiTenancyInterceptor);
 			}
 		}

@@ -1,0 +1,5 @@
+com:
+  fl:
+    mybatis:
+      multi-tenancy:
+        enabled: true

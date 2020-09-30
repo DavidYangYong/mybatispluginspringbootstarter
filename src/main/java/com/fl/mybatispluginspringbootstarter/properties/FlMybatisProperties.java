@@ -1,5 +1,6 @@
 package com.fl.mybatispluginspringbootstarter.properties;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -10,7 +11,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "com.fl.mybatis.multi-tenancy", ignoreInvalidFields = true)
 public class FlMybatisProperties {
 
-	private boolean enabled = Boolean.FALSE;
+	@Value("${com.fl.mybatis.multi-tenancy.enabled:false}")
+	private boolean enabled;
 
 	public boolean isEnabled() {
 		return enabled;
@@ -19,5 +21,4 @@ public class FlMybatisProperties {
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
-
 }

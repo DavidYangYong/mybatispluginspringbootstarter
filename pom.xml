@@ -24,9 +24,8 @@
 		<resources>
 			<resource>
 				<directory>src/main/java/resources</directory>
-				<filtering>false</filtering>
 				<includes>
-					<include>**/*</include>
+					<include>/**/*</include>
 				</includes>
 			</resource>
 		</resources>
@@ -56,6 +55,11 @@
 		</dependency>
 		<dependency>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<artifactId>spring-boot-test-autoconfigure</artifactId>
 			<groupId>org.springframework.boot</groupId>
 			<scope>test</scope>
 		</dependency>
