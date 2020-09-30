@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author even
  */
-@ConfigurationProperties(prefix = "com.fl.mybatis.multiTenancy")
+@ConfigurationProperties(prefix = "com.fl.mybatis.multi-tenancy", ignoreInvalidFields = true)
 public class FlMybatisProperties {
 
 	private boolean enabled = Boolean.FALSE;

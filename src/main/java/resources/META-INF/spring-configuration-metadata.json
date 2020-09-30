@@ -1,9 +1,9 @@
 {
 	"properties": [
 		{
-			"name": "spring.sapjco.enabled",
+			"name": "com.fl.mybatis.multiTenancy",
 			"type": "java.lang.Boolean",
-			"description": "Whether to enable sap jco.",
+			"description": "Whether to enable mybatis multiTenancy.",
 			"defaultValue": false
 		}
 	]

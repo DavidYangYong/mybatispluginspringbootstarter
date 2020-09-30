@@ -1,10 +1,18 @@
 {
-	"properties": [
-		{
-			"name": "spring.sapjco.enabled",
-			"type": "java.lang.Boolean",
-			"description": "Whether to enable sap jco.",
-			"defaultValue": false
-		}
-	]
+  "hints": [],
+  "groups": [
+    {
+      "sourceType": "com.fl.mybatispluginspringbootstarter.properties.FlMybatisProperties",
+      "name": "com.fl.mybatis.multi-tenancy",
+      "type": "com.fl.mybatispluginspringbootstarter.properties.FlMybatisProperties"
+    }
+  ],
+  "properties": [
+    {
+      "sourceType": "com.fl.mybatispluginspringbootstarter.properties.FlMybatisProperties",
+      "defaultValue": false,
+      "name": "com.fl.mybatis.multi-tenancy.enabled",
+      "type": "java.lang.Boolean"
+    }
+  ]
 }

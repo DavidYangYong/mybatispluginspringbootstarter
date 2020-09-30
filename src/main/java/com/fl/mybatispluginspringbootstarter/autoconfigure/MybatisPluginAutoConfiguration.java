@@ -17,28 +17,34 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConditionalOnBean(SqlSessionFactory.class)
 @AutoConfigureAfter(PageHelperAutoConfiguration.class)
+@EnableConfigurationProperties({FlMybatisProperties.class})
 public class MybatisPluginAutoConfiguration {
 
 	@Autowired
 	private List<SqlSessionFactory> sqlSessionFactoryList;
+	@Autowired(required = false)
+	private MultiTenancyInterceptor multiTenancyInterceptor;
 
-
-	@Autowired
-	private FlMybatisProperties flMybatisProperties;
+	@Bean
+	@ConditionalOnProperty(prefix = "com.fl.mybatis.multi-tenancy", name = "enabled", havingValue = "true")
+	public MultiTenancyInterceptor createMultiTenancyInterceptor() {
+		return new MultiTenancyInterceptor();
+	}
 
 	@PostConstruct
 	public void addPageInterceptor() {
 		OpertationTimeInterceptor interceptor = new OpertationTimeInterceptor();
-		MultiTenancyInterceptor multiTenancyInterceptor = new MultiTenancyInterceptor();
-		boolean b = flMybatisProperties.isEnabled();
 		for (SqlSessionFactory sqlSessionFactory : sqlSessionFactoryList) {
 			sqlSessionFactory.getConfiguration().addInterceptor(interceptor);
-			if (b) {
+			if (multiTenancyInterceptor != null) {
 				sqlSessionFactory.getConfiguration().addInterceptor(multiTenancyInterceptor);
 			}
 		}
