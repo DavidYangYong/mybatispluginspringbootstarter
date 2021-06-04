@@ -1,10 +1,10 @@
 package com.fl.mybatispluginspringbootstarter.type;
 
 import java.sql.CallableStatement;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.joda.time.LocalDate;
@@ -21,8 +21,9 @@ public class LocalDateTypeHandler extends BaseTypeHandler<LocalDate> {
 	@Override
 	public void setNonNullParameter(PreparedStatement ps, int i, LocalDate parameter, JdbcType jdbcType)
 			throws SQLException {
-		Date date = parameter.toDate();
-		ps.setObject(i, date);
+		ps.setDate(i, new Date(parameter.toDateTimeAtStartOfDay()
+		                                .toDate()
+		                                .getTime()));
 	}
 
 	@Override

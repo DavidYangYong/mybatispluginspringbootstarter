@@ -1,6 +1,7 @@
 package com.fl.mybatispluginspringbootstarter.type;
 
 import java.sql.CallableStatement;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,7 +21,9 @@ public class LocalDateTimeTypeHandler extends BaseTypeHandler<LocalDateTime> {
 	@Override
 	public void setNonNullParameter(PreparedStatement ps, int i, LocalDateTime parameter, JdbcType jdbcType)
 			throws SQLException {
-		ps.setObject(i, parameter);
+		ps.setDate(i, new Date(parameter.toDateTime()
+		                                .toDate()
+		                                .getTime()));
 	}
 
 	@Override
