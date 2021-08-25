@@ -51,6 +51,19 @@ public class OpertationTimeInterceptor implements Interceptor {
 		// 获取参数
 		Object parameter = invocation.getArgs()[1];
 
+		if (parameter instanceof List) {
+			List<Class> list = (List) parameter;
+			for (Class aClass : list) {
+				extracted(sqlCommandType, aClass);
+			}
+		} else {
+			extracted(sqlCommandType, parameter);
+		}
+
+		return invocation.proceed();
+	}
+
+	private void extracted(SqlCommandType sqlCommandType, Object parameter) throws IllegalAccessException {
 		// 获取私有成员变量
 		Field[] declaredFields = getAllFields(parameter);
 
@@ -69,8 +82,6 @@ public class OpertationTimeInterceptor implements Interceptor {
 				}
 			}
 		}
-
-		return invocation.proceed();
 	}
 
 	@Override
