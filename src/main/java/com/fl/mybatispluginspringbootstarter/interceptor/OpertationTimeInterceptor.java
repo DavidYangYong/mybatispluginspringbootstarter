@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
@@ -47,14 +48,17 @@ public class OpertationTimeInterceptor implements Interceptor {
 
 		// 获取 SQL 命令
 		SqlCommandType sqlCommandType = mappedStatement.getSqlCommandType();
-
 		// 获取参数
 		Object parameter = invocation.getArgs()[1];
-
-		if (parameter instanceof List) {
-			List<Class> list = (List) parameter;
-			for (Class aClass : list) {
-				extracted(sqlCommandType, aClass);
+		if (parameter instanceof MapperMethod.ParamMap) {
+			// 拦截方法参数
+			MapperMethod.ParamMap method = (MapperMethod.ParamMap) invocation.getArgs()[1];
+			List list = (List) method.get("list");
+			if (list != null) {
+				List listClass = (List) list;
+				for (Object aClass : listClass) {
+					extracted(sqlCommandType, aClass);
+				}
 			}
 		} else {
 			extracted(sqlCommandType, parameter);
