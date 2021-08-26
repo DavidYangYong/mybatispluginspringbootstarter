@@ -53,13 +53,17 @@ public class OpertationTimeInterceptor implements Interceptor {
 		if (parameter instanceof MapperMethod.ParamMap) {
 			// 拦截方法参数
 			MapperMethod.ParamMap method = (MapperMethod.ParamMap) invocation.getArgs()[1];
-			Object list = method.get("param1");
-			if (list instanceof List) {
-				if (list != null) {
-					List listClass = (List) list;
-					for (Object aClass : listClass) {
-						extracted(sqlCommandType, aClass);
+			if (method.containsKey("list")) {
+				Object list = method.get("list");
+				if (list instanceof List) {
+					if (list != null) {
+						List listClass = (List) list;
+						for (Object aClass : listClass) {
+							extracted(sqlCommandType, aClass);
+						}
 					}
+				} else {
+					extracted(sqlCommandType, parameter);
 				}
 			} else {
 				extracted(sqlCommandType, parameter);
