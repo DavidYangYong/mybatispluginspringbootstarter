@@ -77,21 +77,23 @@ public class OpertationTimeInterceptor implements Interceptor {
 	}
 
 	private void extracted(SqlCommandType sqlCommandType, Object parameter) throws IllegalAccessException {
-		// 获取私有成员变量
-		Field[] declaredFields = getAllFields(parameter);
+		if (parameter != null) {
+			// 获取私有成员变量
+			Field[] declaredFields = getAllFields(parameter);
 
-		for (Field field : declaredFields) {
-			if (field.getAnnotation(CreateTime.class) != null) {
-				if (SqlCommandType.INSERT.equals(sqlCommandType)) { // insert 语句插入 createTime
-					field.setAccessible(true);
-					field.set(parameter, new Date());
+			for (Field field : declaredFields) {
+				if (field.getAnnotation(CreateTime.class) != null) {
+					if (SqlCommandType.INSERT.equals(sqlCommandType)) { // insert 语句插入 createTime
+						field.setAccessible(true);
+						field.set(parameter, new Date());
+					}
 				}
-			}
 
-			if (field.getAnnotation(UpdateTime.class) != null) { // insert 或 update 语句插入 updateTime
-				if (SqlCommandType.INSERT.equals(sqlCommandType) || SqlCommandType.UPDATE.equals(sqlCommandType)) {
-					field.setAccessible(true);
-					field.set(parameter, new Date());
+				if (field.getAnnotation(UpdateTime.class) != null) { // insert 或 update 语句插入 updateTime
+					if (SqlCommandType.INSERT.equals(sqlCommandType) || SqlCommandType.UPDATE.equals(sqlCommandType)) {
+						field.setAccessible(true);
+						field.set(parameter, new Date());
+					}
 				}
 			}
 		}
