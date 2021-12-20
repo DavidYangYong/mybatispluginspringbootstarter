@@ -1,17 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<artifactId>mybatis-plugin-spring-boot-starter</artifactId>
-	<build>
-		<pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
-			<plugins>
-				<plugin>
-					<artifactId>spring-boot-maven-plugin</artifactId>
-					<configuration>
-						<fork>true</fork>
-					</configuration>
-					<executions>
-						<execution>
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <artifactId>mybatis-plugin-spring-boot-starter</artifactId>
+    <description>mybatis-plugin-spring-boot-starter project for Spring Boot</description>
+
+
+    <groupId>com.fl</groupId>
+
+    <modelVersion>4.0.0</modelVersion>
+
+
+    <name>mybatis-plugin-spring-boot-starter</name>
+    <parent>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <groupId>org.springframework.boot</groupId>
+        <relativePath/>
+        <version>2.0.6.RELEASE</version>
+    </parent>
+    <properties>
+        <java.version>1.8</java.version>
+        <pagehelper-spring-boot-starter>1.2.13</pagehelper-spring-boot-starter>
+    </properties>
+    <version>1.2.15</version>
+    <build>
+        <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+            <plugins>
+                <plugin>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <configuration>
+                        <fork>true</fork>
+                    </configuration>
+                    <executions>
+                        <execution>
 							<goals>
 								<goal>repackage</goal>
 							</goals>
@@ -68,12 +88,11 @@
 			<groupId>com.github.jsqlparser</groupId>
 			<version>3.1</version>
 		</dependency>
-		<dependency>
-			<artifactId>commons-lang</artifactId>
-			<groupId>commons-lang</groupId>
-			<version>2.4</version>
-			<scope>provided</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <scope>provided</scope>
+        </dependency>
 		<dependency>
 			<artifactId>commons-collections4</artifactId>
 			<groupId>org.apache.commons</groupId>
@@ -85,41 +104,21 @@
 			<groupId>com.github.pagehelper</groupId>
 			<scope>provided</scope>
 			<version>${pagehelper-spring-boot-starter}</version>
-		</dependency>
-		<dependency>
-			<artifactId>joda-time</artifactId>
-			<groupId>joda-time</groupId>
-			<scope>provided</scope>
-		</dependency>
-	</dependencies>
+        </dependency>
+        <dependency>
+            <artifactId>joda-time</artifactId>
+            <groupId>joda-time</groupId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
 
-	<description>mybatis-plugin-spring-boot-starter project for Spring Boot</description>
-
-	<distributionManagement>
-		<repository>
-			<id>nexus-releases</id>
-			<url>http://192.168.111.144:9081/nexus/content/repositories/thirdparty/</url>
-		</repository>
-	</distributionManagement>
-
-	<groupId>com.fl</groupId>
-
-	<modelVersion>4.0.0</modelVersion>
-
-
-	<name>mybatis-plugin-spring-boot-starter</name>
-	<parent>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<groupId>org.springframework.boot</groupId>
-		<relativePath/>
-		<version>2.0.6.RELEASE</version>
-	</parent>
-	<properties>
-		<java.version>1.8</java.version>
-		<pagehelper-spring-boot-starter>1.2.13</pagehelper-spring-boot-starter>
-	</properties>
-	<version>1.2.14-RELEASE</version>
+    <distributionManagement>
+        <repository>
+            <id>nexus-releases</id>
+            <url>http://192.168.111.144:9081/nexus/content/repositories/thirdparty/</url>
+        </repository>
+    </distributionManagement>
 
 
 </project>

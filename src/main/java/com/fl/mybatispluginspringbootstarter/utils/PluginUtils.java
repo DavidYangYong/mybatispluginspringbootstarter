@@ -17,7 +17,7 @@ package com.fl.mybatispluginspringbootstarter.utils;
 
 import java.lang.reflect.Proxy;
 import java.util.Properties;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
 
