@@ -52,6 +52,14 @@ public class SQLHelpTool {
 	}
 
 	public String getSql(DyncQueryBase dyncQueryBase) {
+		Expression expression = getSqlExpression(dyncQueryBase);
+		if (expression != null) {
+			return expression.toString();
+		}
+		return "";
+	}
+
+	public Expression getSqlExpression(DyncQueryBase dyncQueryBase) {
 		List<FilterDto> list = dyncQueryBase.getFilterList();
 		if (CollectionUtils.isNotEmpty(list)) {
 			List<Field> fieldsWithAnnotation = FieldUtils.getFieldsListWithAnnotation(dyncQueryBase.getEntity().getClass(),
@@ -126,9 +134,9 @@ public class SQLHelpTool {
 				}
 
 			}
-			return plainSelect.getWhere().toString();
+			return plainSelect.getWhere();
 		} else {
-			return "";
+			return null;
 		}
 	}
 

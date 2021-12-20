@@ -8,6 +8,7 @@ package com.fl.mybatispluginspringbootstarter.autoconfigure;
  **/
 
 import com.fl.mybatispluginspringbootstarter.interceptor.OpertationTimeInterceptor;
+import com.fl.mybatispluginspringbootstarter.interceptor.dyncquery.DyncQueryInterceptor;
 import com.fl.mybatispluginspringbootstarter.interceptor.tenant.MultiTenancyInterceptor;
 import com.fl.mybatispluginspringbootstarter.properties.FlMybatisProperties;
 import com.github.pagehelper.autoconfigure.PageHelperAutoConfiguration;
@@ -45,9 +46,13 @@ public class FlMybatisPluginAutoConfiguration {
 		for (SqlSessionFactory sqlSessionFactory : sqlSessionFactoryList) {
 			sqlSessionFactory.getConfiguration().addInterceptor(interceptor);
 
-			if (flMybatisProperties != null && flMybatisProperties.isEnabled()) {
+			if (flMybatisProperties != null && flMybatisProperties.isMultiTenancy()) {
 				MultiTenancyInterceptor multiTenancyInterceptor = new MultiTenancyInterceptor();
 				sqlSessionFactory.getConfiguration().addInterceptor(multiTenancyInterceptor);
+			}
+			if (flMybatisProperties != null && flMybatisProperties.isDyncQuery()) {
+				DyncQueryInterceptor dyncQueryInterceptor = new DyncQueryInterceptor();
+				sqlSessionFactory.getConfiguration().addInterceptor(dyncQueryInterceptor);
 			}
 		}
 	}

@@ -7,16 +7,25 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author even
  */
-@ConfigurationProperties(prefix = "com.fl.mybatis.multi-tenancy")
+@ConfigurationProperties(prefix = "com.fl.mybatis")
 public class FlMybatisProperties {
 
-	private boolean enabled = Boolean.FALSE;
+	private boolean multiTenancy = Boolean.FALSE;
+	private boolean dyncQuery = Boolean.FALSE;
 
-	public boolean isEnabled() {
-		return enabled;
+	public boolean isDyncQuery() {
+		return dyncQuery;
 	}
 
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
+	public void setDyncQuery(boolean dyncQuery) {
+		this.dyncQuery = dyncQuery;
+	}
+
+	public boolean isMultiTenancy() {
+		return multiTenancy;
+	}
+
+	public void setMultiTenancy(boolean multiTenancy) {
+		this.multiTenancy = multiTenancy;
 	}
 }
