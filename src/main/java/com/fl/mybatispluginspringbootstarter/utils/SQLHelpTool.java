@@ -73,7 +73,7 @@ public class SQLHelpTool {
 					filerName = queryFilterTarget.name();
 					tableName = queryFilterTarget.tableName();
 				}
-				if (StringUtils.isNotEmpty(filerName)) {
+				if (StringUtils.isNotEmpty(filerName) && StringUtils.isNotEmpty(filterDto.getValue())) {
 					String columnName = StringUtils.join(tableName, ".", filerName);
 					Column column = new Column(columnName);
 					switch (flg) {
