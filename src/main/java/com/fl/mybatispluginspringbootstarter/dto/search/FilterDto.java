@@ -31,6 +31,30 @@ public class FilterDto {
 	 */
 	private String condEnd;
 
+	private String condType;
+
+	public String getCondType() {
+		return condType;
+	}
+
+	public void setCondType(String condType) {
+		this.condType = condType;
+	}
+
+	@Override
+	public String toString() {
+		return "FilterDto{" +
+				"fieldName='" + fieldName + '\'' +
+				", field='" + field + '\'' +
+				", constraintName='" + constraintName + '\'' +
+				", constraint='" + constraint + '\'' +
+				", value='" + value + '\'' +
+				", condStart='" + condStart + '\'' +
+				", condEnd='" + condEnd + '\'' +
+				", condType='" + condType + '\'' +
+				'}';
+	}
+
 	public String getFieldName() {
 		return fieldName;
 	}
@@ -87,16 +111,4 @@ public class FilterDto {
 		this.condEnd = condEnd;
 	}
 
-	@Override
-	public String toString() {
-		return "FilterDto{" +
-				"fieldName='" + fieldName + '\'' +
-				", field='" + field + '\'' +
-				", constraintName='" + constraintName + '\'' +
-				", constraint='" + constraint + '\'' +
-				", value='" + value + '\'' +
-				", condStart='" + condStart + '\'' +
-				", condEnd='" + condEnd + '\'' +
-				'}';
-	}
 }
