@@ -28,4 +28,12 @@ public class FlMybatisProperties {
 	public void setMultiTenancy(boolean multiTenancy) {
 		this.multiTenancy = multiTenancy;
 	}
+
+	@Override
+	public String toString() {
+		return "FlMybatisProperties{" +
+				"multiTenancy=" + multiTenancy +
+				", dyncQuery=" + dyncQuery +
+				'}';
+	}
 }

@@ -1,0 +1,5 @@
+com:
+  fl:
+    mybatis:
+      multiTenancy: true
+      dyncQuery: true

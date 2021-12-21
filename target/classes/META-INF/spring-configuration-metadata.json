@@ -3,7 +3,7 @@
   "groups": [
     {
       "sourceType": "com.fl.mybatispluginspringbootstarter.properties.FlMybatisProperties",
-      "name": "com.fl.mybatis.multi-tenancy",
+      "name": "com.fl.mybatis",
       "type": "com.fl.mybatispluginspringbootstarter.properties.FlMybatisProperties"
     }
   ],
@@ -11,7 +11,13 @@
     {
       "sourceType": "com.fl.mybatispluginspringbootstarter.properties.FlMybatisProperties",
       "defaultValue": false,
-      "name": "com.fl.mybatis.multi-tenancy.enabled",
+      "name": "com.fl.mybatis.dync-query",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "com.fl.mybatispluginspringbootstarter.properties.FlMybatisProperties",
+      "defaultValue": false,
+      "name": "com.fl.mybatis.multi-tenancy",
       "type": "java.lang.Boolean"
     }
   ]

@@ -5,6 +5,12 @@
 			"type": "java.lang.Boolean",
 			"description": "Whether to enable mybatis multiTenancy.",
 			"defaultValue": false
+		},
+		{
+			"name": "com.fl.mybatis.dyncQuery",
+			"type": "java.lang.Boolean",
+			"description": "Whether to enable mybatis dyncQuery.",
+			"defaultValue": false
 		}
 	]
 }

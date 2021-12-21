@@ -1,22 +1,25 @@
 package com.fl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 
 import com.fl.mybatispluginspringbootstarter.autoconfigure.FlMybatisPluginAutoConfiguration;
+import com.github.pagehelper.autoconfigure.PageHelperAutoConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = {FlMybatisPluginAutoConfiguration.class})
-@TestPropertySource("classpath:application.yml")
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest(classes = {FlMybatisPluginAutoConfiguration.class, PageHelperAutoConfiguration.class})
+@ActiveProfiles("test")
 public class ServiceConfigApplicationTests {
 
-	@Autowired(required = false)
+	@MockBean
+	private PageHelperAutoConfiguration pageHelperAutoConfiguration;
+	@MockBean
 	private FlMybatisPluginAutoConfiguration flMybatisPluginAutoConfiguration;
 
 	@Test
@@ -24,11 +27,22 @@ public class ServiceConfigApplicationTests {
 	}
 
 	@Test
+	public void getInfo1() {
+		assertNotNull(pageHelperAutoConfiguration);
+		//assertEquals(null, flMybatisPluginAutoConfiguration.getFlMybatisProperties()
+		//	);
+	}
+
+	@Test
 	public void getInfo2() {
-		assertNull(flMybatisPluginAutoConfiguration);
+		assertNotNull(flMybatisPluginAutoConfiguration);
+
+	}
+
+	@Test
+	public void getInfo3() {
 		assertEquals(null, flMybatisPluginAutoConfiguration.getFlMybatisProperties()
 		);
 	}
-
 }
 
