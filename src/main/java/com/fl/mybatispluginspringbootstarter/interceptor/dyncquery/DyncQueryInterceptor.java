@@ -39,12 +39,14 @@ import org.apache.ibatis.session.RowBounds;
 /**
  * 自定义 Mybatis 插件，自动设置过滤查询条件
  */
-@Intercepts({
-		@Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class, RowBounds.class,
-				ResultHandler.class, CacheKey.class, BoundSql.class}),
-		@Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class, RowBounds.class,
-				ResultHandler.class})
-})
+@Intercepts(
+		{
+				@Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class, RowBounds.class,
+						ResultHandler.class}),
+				@Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class, RowBounds.class,
+						ResultHandler.class, CacheKey.class, BoundSql.class}),
+		}
+)
 @Slf4j
 public class DyncQueryInterceptor implements Interceptor {
 

@@ -19,7 +19,7 @@
     </parent>
     <properties>
         <java.version>1.8</java.version>
-        <pagehelper-spring-boot-starter>1.2.13</pagehelper-spring-boot-starter>
+        <pagehelper-spring-boot-starter>1.4.1</pagehelper-spring-boot-starter>
     </properties>
     <version>1.2.15</version>
     <build>
@@ -82,11 +82,6 @@
 			<artifactId>spring-boot-test-autoconfigure</artifactId>
 			<groupId>org.springframework.boot</groupId>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<artifactId>jsqlparser</artifactId>
-			<groupId>com.github.jsqlparser</groupId>
-			<version>3.1</version>
 		</dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
