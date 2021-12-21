@@ -142,12 +142,14 @@ public class DyncQueryInterceptor implements Interceptor {
 				if (selectBody instanceof PlainSelect) {
 					PlainSelect ps = (PlainSelect) selectBody;
 					Expression expression = sqlHelpTool.getSqlExpression(dyncQueryBase);
-					if (ps.getWhere() == null) {
-						ps.setWhere(new Parenthesis(expression));
-					} else {
-						ps.setWhere(new AndExpression(ps.getWhere(), new Parenthesis(expression)));
+					if (expression != null) {
+						if (ps.getWhere() == null) {
+							ps.setWhere(new Parenthesis(expression));
+						} else {
+							ps.setWhere(new AndExpression(ps.getWhere(), new Parenthesis(expression)));
+						}
+						return select.toString();
 					}
-					return select.toString();
 				}
 
 			}
