@@ -82,6 +82,10 @@ public class DyncQueryInterceptor implements Interceptor {
 					}
 				}
 
+				if (dyncQueryBase == null) {
+					return invocation.proceed();
+				}
+
 				BoundSql boundSql = ms.getBoundSql(parameterObject);
 
 				String oldSql = boundSql.getSql();
