@@ -22,6 +22,7 @@ import org.apache.ibatis.plugin.Intercepts;
 import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.plugin.Plugin;
 import org.apache.ibatis.plugin.Signature;
+import org.apache.ibatis.session.defaults.DefaultSqlSession.StrictMap;
 
 /**
  * 自定义 Mybatis 插件，自动设置 createTime 和 updatTime 的值。 拦截 update 操作（添加和修改）
@@ -68,7 +69,24 @@ public class OpertationTimeInterceptor implements Interceptor {
 			} else {
 				extracted(sqlCommandType, parameter);
 			}
-
+		} else if (parameter instanceof StrictMap) {
+			// 拦截方法参数
+			StrictMap method = (StrictMap) invocation.getArgs()[1];
+			if (method.containsKey("list")) {
+				Object list = method.get("list");
+				if (list instanceof List) {
+					if (list != null) {
+						List listClass = (List) list;
+						for (Object aClass : listClass) {
+							extracted(sqlCommandType, aClass);
+						}
+					}
+				} else {
+					extracted(sqlCommandType, parameter);
+				}
+			} else {
+				extracted(sqlCommandType, parameter);
+			}
 		} else {
 			extracted(sqlCommandType, parameter);
 		}

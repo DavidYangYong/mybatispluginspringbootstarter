@@ -21,15 +21,12 @@
         <java.version>1.8</java.version>
         <pagehelper-spring-boot-starter>1.4.1</pagehelper-spring-boot-starter>
     </properties>
-    <version>1.2.15</version>
+    <version>1.2.18</version>
     <build>
         <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
             <plugins>
                 <plugin>
                     <artifactId>spring-boot-maven-plugin</artifactId>
-                    <configuration>
-                        <fork>true</fork>
-                    </configuration>
                     <executions>
                         <execution>
 							<goals>
